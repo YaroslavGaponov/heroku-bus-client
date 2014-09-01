@@ -1,6 +1,6 @@
 var Client = require('../index.js');
 
-var consumer = new Client();
+var consumer = new Client('http://stormy-gorge-8934.herokuapp.com');
 
 
 consumer.on('error', function(err) {
@@ -11,7 +11,7 @@ consumer.on('receipt', function(message) {
     console.log(message);
 });
 
-consumer.send('topic', 'test', { "time": Date() }, function(err, message) {
+consumer.send('topic', 'test', { "time": Date(), 'message': process.argv[2] || 'Hello!!!' }, function(err, message) {
     if (err) {
         console.log(err);
     } else {

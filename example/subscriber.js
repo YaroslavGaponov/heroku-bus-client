@@ -1,7 +1,7 @@
 
 var Client = require('../index.js');
 
-var subscriber = new Client();
+var subscriber = new Client('http://stormy-gorge-8934.herokuapp.com');
 
 subscriber.subscribe('topic', 'test', function(err, message) {
    console.log(message); 
