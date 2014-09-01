@@ -1,4 +1,4 @@
-var Client = require('../index.js');
+var Client = require('../../index.js');
 
 var publisher = new Client('http://stormy-gorge-8934.herokuapp.com');
 

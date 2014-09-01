@@ -1,5 +1,5 @@
 
-var Client = require('../index.js');
+var Client = require('../../index.js');
 
 var subscriber = new Client('http://localhost');
 

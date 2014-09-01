@@ -1,5 +1,5 @@
 
-var Client = require('../index.js');
+var Client = require('../../index.js');
 
 var subscriber = new Client('http://stormy-gorge-8934.herokuapp.com');
 
