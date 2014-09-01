@@ -44,7 +44,7 @@ Request.prototype.setTimeout  = function(timeout) {
 Request.prototype.done = function(cb) {    
     var options = url.parse(this.url);
     options.method = this.method;
-    options.headers = { 'Content-Type': 'application/json' };    
+    options.headers = { 'Content-Type': 'application/json', 'Cache-Control':'no-cache' };    
     var req = http.request(options, function(res) {
         var data = '';
         res.on('data', function(chunk) {
