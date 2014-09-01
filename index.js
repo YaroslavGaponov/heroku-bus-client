@@ -143,6 +143,7 @@ Client.prototype.subscribe = function(type, name, callback) {
                 _subscribe(_done);
                 break;                
             case 'Request Time-out':
+            case 'Service Unavailable':
                 _subscribe(_done);
                 break;
             default:
