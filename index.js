@@ -91,8 +91,25 @@ var Client = module.exports = function(baseUrl) {
 
 util.inherits(Client, EE);
 
-Client.prototype.connect = function() {
-    this.emit('connected');
+Client.prototype.connect = function(callback) {
+    var self = this;
+    Request().setUrl(self.baseUrl,'/').setBody(HTTP.GET).done(function(statusCode, data) {
+        switch (http.STATUS_CODES[statusCode]) {
+            case 'OK':
+                self.emit('connected', data);
+                if (callback && typeof callback === 'function') {
+                    callback(null, data);
+                }
+                break;
+            default:
+                self.emit('error', data);
+                if (callback && typeof callback === 'function') {
+                    callback(data, null);
+                }
+                break;
+        }
+    });
+    
 }
 
 Client.prototype.send = function(type, name, message, callback) {
