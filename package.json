@@ -1,6 +1,6 @@
 {
   "name": "heroku-bus-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MQ client for simple MQ Broker at Heroku",
   "main": "index.js",
   "directories": {

@@ -6,9 +6,7 @@ var EE = require('events').EventEmitter;
 
 HTTP = {
     'GET': 'GET',
-    'POST': 'POST',
-    'PUT': 'PUT',
-    'DELETE': 'DELETE'
+    'POST': 'POST'
 }
 
 
@@ -94,7 +92,7 @@ var Client = module.exports = function(baseUrl) {
 util.inherits(Client, EE);
 
 Client.prototype.connect = function() {
-    
+    this.emit('connected');
 }
 
 Client.prototype.send = function(type, name, message, callback) {
@@ -140,8 +138,6 @@ Client.prototype.subscribe = function(type, name, callback) {
                 if (callback && typeof callback === 'function') {
                     callback(null, data);
                 }
-                _subscribe(_done);
-                break;                
             case 'Request Time-out':
             case 'Service Unavailable':
                 _subscribe(_done);
@@ -163,5 +159,5 @@ Client.prototype.subscribe = function(type, name, callback) {
 
 
 Client.prototype.disconnect = function() {
-    
+    this.emit('disconnectd');
 }
