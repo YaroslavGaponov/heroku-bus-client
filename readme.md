@@ -1,7 +1,7 @@
 Heroku bus client
 ========
 
-Node.JS client for Heroku Bus server
+Node.JS client for Heroku Bus server (https://github.com/YaroslavGaponov/heroku-bus-server)
 
 
 Example
