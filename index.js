@@ -1,59 +1,61 @@
-
 var http = require('http');
 var util = require('util');
 var url = require('url');
-var EE = require('events').EventEmitter;
+var EE = require('events')
+    .EventEmitter;
 
 HTTP = {
     'GET': 'GET',
     'POST': 'POST'
 }
 
-
-var Request = function(baseUrl) {
+var Request = function (baseUrl) {
     if (this instanceof Request) {
         this.method = null;
-        this.url = null;        
+        this.url = null;
         this.body = null;
-        this.timeout = null;
+        this.timeout = 10000;
     } else {
         return new Request();
     }
 }
 
-Request.prototype.setMethod = function(method) {
+Request.prototype.setMethod = function (method) {
     this.method = method;
     return this;
 }
 
-Request.prototype.setUrl = function(baseUrl, path) {
+Request.prototype.setUrl = function (baseUrl, path) {
     this.url = url.resolve(baseUrl, path);
     return this;
 }
 
-Request.prototype.setBody = function(body) {
+Request.prototype.setBody = function (body) {
     this.body = body;
     return this;
 }
 
-Request.prototype.setTimeout  = function(timeout) {
+Request.prototype.setTimeout = function (timeout) {
     this.timeout = timeout;
     return this;
 }
 
-Request.prototype.done = function(cb) {    
+Request.prototype.done = function (cb) {
     var options = url.parse(this.url);
     options.method = this.method;
-    options.headers = { 'Content-Type': 'application/json', 'Cache-Control':'no-cache' };    
-    var req = http.request(options, function(res) {
+    options.headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+    };
+    var req = http.request(options, function (res) {
         var data = '';
-        res.on('data', function(chunk) {
+        res.on('data', function (chunk) {
             data += chunk.toString();
         });
-        res.once('end', function() {
+        res.once('end', function () {
             return cb(res.statusCode, data);
         });
-        res.once('error', function(err) {
+        res.once('error', function (err) {
             return cb(res.statusCode, err);
         });
     });
@@ -79,22 +81,25 @@ var TransportError = function (code, message, details) {
 
 util.inherits(TransportError, Error);
 
-TransportError.prototype.toString = function() {    
+TransportError.prototype.toString = function () {
     return util.format('code: %s, message: %s, details: %s', this.code, this.message, this.details);
 }
 
 
-var Client = module.exports = function(baseUrl) {
+var Client = module.exports = function (baseUrl) {
     EE.call(this);
     this.baseUrl = baseUrl || 'http://localhost:5000';
 }
 
 util.inherits(Client, EE);
 
-Client.prototype.connect = function(callback) {
+Client.prototype.connect = function (callback) {
     var self = this;
-    Request().setUrl(self.baseUrl,'/').setBody(HTTP.GET).done(function(statusCode, data) {
-        switch (http.STATUS_CODES[statusCode]) {
+    Request()
+        .setUrl(self.baseUrl, '/')
+        .setBody(HTTP.GET)
+        .done(function (statusCode, data) {
+            switch (http.STATUS_CODES[statusCode]) {
             case 'OK':
                 self.emit('connected', data);
                 if (callback && typeof callback === 'function') {
@@ -107,74 +112,79 @@ Client.prototype.connect = function(callback) {
                     callback(data, null);
                 }
                 break;
-        }
-    });
-    
+            }
+        });
+
 }
 
-Client.prototype.send = function(type, name, message, callback) {
+Client.prototype.send = function (type, name, message, callback) {
     var self = this;
-    
-    var _send = function(callback) {
-        Request().setUrl(self.baseUrl, util.format('/%s/%s', type, name)).setMethod(HTTP.POST).setBody(message).done(callback);
+
+    var _send = function (callback) {
+        Request()
+            .setUrl(self.baseUrl, util.format('/%s/%s', type, name))
+            .setMethod(HTTP.POST)
+            .setBody(message)
+            .done(callback);
     }
-    
-    var _done = function(statusCode, data) {
+
+    var _done = function (statusCode, data) {
         switch (http.STATUS_CODES[statusCode]) {
-            case 'OK':
-                self.emit('receipt', message);
-                if (callback && typeof callback === 'function') {
-                    callback(null, message);
-                }            
-                break;
-            default:
-                var error = new TransportError(statusCode, http.STATUS_CODES[statusCode], data);
-                self.emit('error', error);
-                if (callback && typeof callback === 'function') {
-                    callback(error, null);
-                }                            
-                break;
+        case 'OK':
+            self.emit('receipt', message);
+            if (callback && typeof callback === 'function') {
+                callback(null, message);
+            }
+            break;
+        default:
+            var error = new TransportError(statusCode, http.STATUS_CODES[statusCode], data);
+            self.emit('error', error);
+            if (callback && typeof callback === 'function') {
+                callback(error, null);
+            }
+            break;
         }
     }
-    
+
     _send(_done);
 }
 
-
-Client.prototype.subscribe = function(type, name, callback) {
+Client.prototype.subscribe = function (type, name, callback) {
     var self = this;
-    
-    var _subscribe = function(callback) {
-        Request().setTimeout(25000).setUrl(self.baseUrl, util.format('/%s/%s', type, name)).setMethod(HTTP.GET).done(callback);
+
+    var _subscribe = function (callback) {
+        Request()
+            .setTimeout(25000)
+            .setUrl(self.baseUrl, util.format('/%s/%s', type, name))
+            .setMethod(HTTP.GET)
+            .done(callback);
     }
-    
-    var _done = function(statusCode, data) {        
+
+    var _done = function (statusCode, data) {
         switch (http.STATUS_CODES[statusCode]) {
-            case 'OK':
-                self.emit('message', data);
-                if (callback && typeof callback === 'function') {
-                    callback(null, data);
-                }
-            case 'Request Time-out':
-            case 'Service Unavailable':
-                _subscribe(_done);
-                break;
-            default:
-                var error = new TransportError(statusCode, http.STATUS_CODES[statusCode], data);
-                self.emit('error', error);
-                if (callback && typeof callback === 'function') {
-                    callback(error, null);
-                }                            
-                break;            
+        case 'OK':
+            self.emit('message', data);
+            if (callback && typeof callback === 'function') {
+                callback(null, data);
+            }
+        case 'Request Time-out':
+        case 'Service Unavailable':
+            _subscribe(_done);
+            break;
+        default:
+            var error = new TransportError(statusCode, http.STATUS_CODES[statusCode], data);
+            self.emit('error', error);
+            if (callback && typeof callback === 'function') {
+                callback(error, null);
+            }
+            break;
         }
-        
+
     }
-    
-    _subscribe(_done);    
+
+    _subscribe(_done);
 }
 
-
-
-Client.prototype.disconnect = function() {
+Client.prototype.disconnect = function () {
     this.emit('disconnectd');
 }
